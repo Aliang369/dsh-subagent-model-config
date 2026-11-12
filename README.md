@@ -73,7 +73,7 @@ DSH 原生 Team 编队的 `spawn_teammate` 只有 name / description / prompt / 
 
 ### 工作原理
 
-插件在运行时包装两个 DSH 内部接口：`agentTeams.spawnTeammate`（采集队员名）与 `SubagentRuntime.startContinuable`（注入点）。派单发生时按队员名匹配规则表，把命中的 provider / model / reasoningEffort 写进官方原生支持的 `SubagentStartRequest.agentOptions`——只接上编队路径没接的线，不改任何官方行为。包装装在实例与原型两层（幂等防重入），内部异常一律只记录不抛出；配置为空或关闭时，行为与未装本插件完全一致。
+插件在运行时包装两个 DSH 内部接口：`agentTeams.spawnTeammate`（采集队员名）与 `SubagentRuntime.startActivation`（注入点）。派单发生时按队员名匹配规则表，把命中的 provider / model / reasoningEffort 写进官方原生支持的 `SubagentStartRequest.agentOptions`——只接上编队路径没接的线，不改任何官方行为。包装装在实例与原型两层（幂等防重入），内部异常一律只记录不抛出；配置为空或关闭时，行为与未装本插件完全一致。
 
 ### 兼容性与测试
 
@@ -121,7 +121,7 @@ Configure: Settings → **Subagent Models** — add rules with a name pattern, o
 
 ### How it works
 
-The plugin wraps two DSH internals at runtime: `agentTeams.spawnTeammate` (captures the teammate name) and `SubagentRuntime.startContinuable` (injection point). On spawn it matches the name against the rule table and writes the resolved fields into `SubagentStartRequest.agentOptions` — a field DSH natively supports but the team path never wired up. Wraps are installed on both instance and prototype (idempotent); internal errors are logged, never thrown; with an empty or disabled config the behavior is identical to not having the plugin.
+The plugin wraps two DSH internals at runtime: `agentTeams.spawnTeammate` (captures the teammate name) and `SubagentRuntime.startActivation` (injection point). On spawn it matches the name against the rule table and writes the resolved fields into `SubagentStartRequest.agentOptions` — a field DSH natively supports but the team path never wired up. Wraps are installed on both instance and prototype (idempotent); internal errors are logged, never thrown; with an empty or disabled config the behavior is identical to not having the plugin.
 
 ### Compatibility & tests
 
