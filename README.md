@@ -78,9 +78,12 @@ DSH 原生 Team 编队的 `spawn_teammate` 只有 name / description / prompt / 
 ### 兼容性与测试
 
 - **声明范围**：`engines.dsh >= 0.1.7-alpha.1`，Node >= 22
-- **实测**：DSH 0.1.7-alpha.2（首发实测）；DSH 0.2.0 桌面端（日常在用）
-- `npm test`：143 用例（17 套件）全过
-- 本插件钩在 DSH 内部运行时接口上，官方未来版本可能改变这些接口导致失效；遇到问题欢迎提 issue
+- **实测**：DSH 0.1.7-alpha.2（首发实测）；DSH 0.2.0 桌面端；DSH 0.2.2-rc.5 桌面端
+- `npm test`：134 用例（17 套件）。`test/gate.test.mjs` 直接读取仓库根的 `config.json`，要求其中存在 `video-` 规则；缺该文件或规则表里没有 `video-` 前缀时，该套件的前置断言会失败（本机为 `config.json` 未配 `video-` 规则：124 通过 / 10 失败，其余套件全过）
+- **注入点自适应**：注入点方法名在官方各版本间会漂移（0.1.x 的 `startContinuable` → 0.2.2 的 `startActivation`）。插件按 `['startActivation', 'startContinuable']` 新→旧探测，命中哪个装哪个，改名不会再导致静默失效；一个都找不到时写一条 `injection-unavailable` 取证记录，而不是安静地不生效。
+- **spec 形状自适应**：0.2.2 的 `SubagentActivationSpec` 直接继承 `SubagentStartRequest`，`agentOptions` 与 `parent` 都在**顶层**，没有 `request` 这一层（0.1.x 才嵌在 `request` 里）。插件按实到手的形状写入：写顶层 `agentOptions`，仅在 `spec.request` 存在时再写一份兼容旧版；探针新增 `applied` / `specShape` 两个字段，用来区分「算出了注入」与「真的写进了 spec」——只盯 `injected` 会把未生效误判成生效。
+- **队员名来源自适应**：0.2.2 起 `agentTeams.spawnTeammate` 已从官方移除，队员统一由标准 `subagent` 工具创建，名字直接放在 `SubagentActivationSpec.name` 里。插件按 `async-local store → spec.name` 的顺序取名，前者服务 ≤0.2.1 的编队路径，后者是现行路径；两处都取不到（匿名派单）则不套任何规则。
+- 本插件钩在 DSH 内部运行时接口上，官方未来版本仍可能改变这些接口；遇到问题欢迎提 issue
 
 ### 视频预设配套：队员闸门与能力限制
 
